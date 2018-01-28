@@ -1,0 +1,19 @@
+{
+  "name": "kubernetes-node-graceful",
+  "version": "1.0.0",
+  "description": "Demonstrate NodeJS gracefull shutdown in Kubernetes",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "kubernetes",
+    "k8s",
+    "node",
+    "nodejs",
+    "gracefull",
+    "shutdown"
+  ],
+  "author": "Brandon Doran <bodran@gmail.com>",
+  "license": "MIT"
+}
