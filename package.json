@@ -15,5 +15,9 @@
     "shutdown"
   ],
   "author": "Brandon Doran <bodran@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.16.2",
+    "stoppable": "^1.0.5"
+  }
 }
