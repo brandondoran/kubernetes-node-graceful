@@ -2,12 +2,13 @@ const http = require('http');
 const stoppable = require('stoppable');
 const createApp = require('./app');
 const db = require('./lib/db');
+const log = require('./lib/log');
 
 const app = createApp({ db });
 const server = stoppable(http.createServer(app));
 
 function abort() {
-  console.log('Shutting down server');
+  log.info('Shutting down server');
   process.exit(1);
 }
 
@@ -18,20 +19,19 @@ function gracefulStart() {
   db
     .isReady()
     .then(() => {
-      console.log('Database ready');
+      log.info('Database ready');
       const port = process.env.PORT || 3001;
       server.listen(port, err => {
         if (err) {
-          // fatal
-          console.error(err, 'Unable to start server');
+          log.fatal(err, 'Unable to start server');
           process.exit(1);
         }
-        console.log(`Listening on port ${server.address().port}`);
+        log.info(`Listening on port ${server.address().port}`);
       });
     })
     .catch(err => {
       // fatal
-      console.error(err, 'Database not ready');
+      log.error(err, 'Database not ready');
       abort();
     });
 }
@@ -44,7 +44,7 @@ function releaseResources() {
     try {
       db.disconnect();
     } catch (errDb) {
-      console.error(errDb, 'Error closing database connection');
+      log.error(errDb, 'Error closing database connection');
     }
   }
 }
@@ -54,12 +54,12 @@ function releaseResources() {
  */
 function onServerStopped(err) {
   if (err) {
-    console.error(err, 'Error stopping server');
+    log.error(err, 'Error stopping server');
   } else {
-    console.log('Server stopped successfully');
+    log.info('Server stopped successfully');
   }
   releaseResources();
-  console.log('Graceful shutdown succesful');
+  log.info('Graceful shutdown succesful');
   process.exit(0);
 }
 
@@ -68,7 +68,7 @@ function onServerStopped(err) {
  * (including keep-alives) without killing requests that are in-flight.
  */
 function gracefulShutdown() {
-  console.log('Shutting down server gracefully');
+  log.info('Shutting down server gracefully');
   server.stop(onServerStopped);
 }
 
@@ -77,7 +77,7 @@ function gracefulShutdown() {
  */
 function onSigTerm() {
   const delay = process.env.GRACEFUL_SHUTDOWN_DELAY || 9000;
-  console.log(`SIGTERM received, starting shutdown in ${delay} ms.`);
+  log.info(`SIGTERM received, starting shutdown in ${delay} ms.`);
   setTimeout(gracefulShutdown, delay);
 }
 
@@ -86,7 +86,7 @@ function onSigTerm() {
  */
 function onUhandledRejection(reason, promise) {
   // fatal
-  console.error({ reason, promise }, 'Unhandled Rejection');
+  log.error({ reason, promise }, 'Unhandled Rejection');
   releaseResources();
   abort();
 }
@@ -96,7 +96,7 @@ process.on('SIGTERM', onSigTerm).on('unhandledRejection', onUhandledRejection);
 // PM2, in development, sends a SIGINT during restarts
 if (process.env.NODE_ENV === 'development') {
   process.on('SIGINT', () => {
-    console.log('SIGINT received');
+    log.info('SIGINT received');
     abort();
   });
 }

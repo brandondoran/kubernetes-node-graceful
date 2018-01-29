@@ -1,3 +1,4 @@
+const log = require('../lib/log');
 const timeout = require('../lib/timeout');
 
 const status = {
@@ -25,7 +26,7 @@ const checkDb = db =>
   timeout(db.ping('pong'), 500)
     .then(() => status.OK)
     .catch(err => {
-      console.error(err, 'db health check failed');
+      log.error(err, 'db health check failed');
       return status.FAIL;
     });
 
@@ -42,7 +43,7 @@ module.exports = function createHealthRoute({ db }) {
 
     // SIGTERM has been received: app is not ready to serve more requests
     if (shutdown) {
-      console.info('Health probe after SIGTERM');
+      log.info('Health probe after SIGTERM');
       return res.status(statusCodes.SERVICE_UNAVAILABLE).json(result);
     }
 
@@ -51,7 +52,9 @@ module.exports = function createHealthRoute({ db }) {
       result.db = {
         status: dbStatus
       };
-      res.status(getStatusCode(statuses)).json(result);
+      const statusCode = getStatusCode(statuses);
+      log.info({ statusCode }, 'Health check');
+      res.status(statusCode).json(result);
     });
   };
 };
