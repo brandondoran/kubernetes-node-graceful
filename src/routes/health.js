@@ -43,7 +43,6 @@ module.exports = function createHealthRoute({ db }) {
 
     // SIGTERM has been received: app is not ready to serve more requests
     if (shutdown) {
-      log.info('Health probe after SIGTERM');
       return res.status(statusCodes.SERVICE_UNAVAILABLE).json(result);
     }
 
