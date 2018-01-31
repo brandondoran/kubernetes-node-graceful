@@ -11,12 +11,6 @@ const statusCodes = {
   SERVICE_UNAVAILABLE: 503
 };
 
-let shutdown = false;
-
-process.on('SIGTERM', () => {
-  shutdown = true;
-});
-
 const getStatusCode = statuses =>
   statuses.some(s => s !== status.OK)
     ? statusCodes.SERVICE_UNAVAILABLE
@@ -40,11 +34,6 @@ module.exports = function createHealthRoute({ db }) {
         uptime: process.uptime()
       }
     };
-
-    // SIGTERM has been received: app is not ready to serve more requests
-    if (shutdown) {
-      return res.status(statusCodes.SERVICE_UNAVAILABLE).json(result);
-    }
 
     Promise.all([checkDb(db)]).then(statuses => {
       const [dbStatus] = statuses;

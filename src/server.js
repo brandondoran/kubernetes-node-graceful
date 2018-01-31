@@ -26,12 +26,14 @@ function gracefulStart() {
           log.fatal(err, 'Unable to start server');
           process.exit(1);
         }
-        log.info(`Listening on port ${server.address().port}`);
+        log.info(
+          { version: '1.3.4' },
+          `Listening on port ${server.address().port}`
+        );
       });
     })
     .catch(err => {
-      // fatal
-      log.error(err, 'Database not ready');
+      log.fatal(err, 'Database not ready');
       abort();
     });
 }
@@ -76,17 +78,15 @@ function gracefulShutdown() {
  * Handler for SIGTERM
  */
 function onSigTerm() {
-  const delay = process.env.GRACEFUL_SHUTDOWN_DELAY || 9000;
-  log.info(`SIGTERM received, starting shutdown in ${delay} ms.`);
-  setTimeout(gracefulShutdown, delay);
+  log.info(`SIGTERM received, starting shutdown`);
+  gracefulShutdown();
 }
 
 /**
  * Handler for unhandled rejections
  */
 function onUhandledRejection(reason, promise) {
-  // fatal
-  log.error({ reason, promise }, 'Unhandled Rejection');
+  log.fatal({ reason, promise }, 'Unhandled Rejection');
   releaseResources();
   abort();
 }

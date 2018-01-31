@@ -16,7 +16,14 @@ spec:
     spec:
       containers:
       - name: k8s-node-graceful
-        image: brandondoran/k8s-node-graceful:v1.0.0
+        image: brandondoran/k8s-node-graceful:1.3.4
+        lifecycle:
+          # This hook is called immediately before a container is terminated.
+          # It is blocking, so must complete before the call to delete the container can be sent
+          preStop:
+            exec:
+              # Sleep for 10 seconds to allow time for pod to be removed from load balancer
+              command: ['/bin/sh', '-c', 'sleep 10 && echo $(date): preStop hook - Sleep expired >> /dev/termination-log']
         # Readiness Probe: determine if app is ready to serve requests.
         # Default state is "failure"
         readinessProbe:
